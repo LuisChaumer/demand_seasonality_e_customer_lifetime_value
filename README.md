@@ -1,86 +1,142 @@
-Mobility Analytics – Demand Seasonality & Customer Lifetime Value 🚕📊
+# Mobility Analytics – Demand Seasonality & Customer Lifetime Value (CLV) 🚕📊
 
-Author: Luis Chaumer
-Role: Data Analyst
-Tools: Python, SQL (SQLite), Pandas, NumPy, Matplotlib
+**Author:** Luis Chaumer  
+**Role:** Data Analyst  
+**Tools:** Python, SQL (SQLite), Pandas, NumPy, Matplotlib, Jupyter Notebook  
+**Dataset:** Synthetic — 112,568 trips & 30,000 customers  
+**Period:** May 2024 – May 2025  
 
-📘 Project Overview
+---
 
-This project analyzes demand patterns and customer lifetime value (CLV) for a fictional ride-hailing mobility service.
-It uses 112,568 synthetic trips (May 2024 – May 2025) and 30,000 customers across 5 regions.
+## 📘 Project Overview
 
-The goal is to understand:
+This project analyzes **mobility demand patterns** and **customer lifetime value (CLV)** in a fictional ride-hailing platform.
 
-When demand is highest (hour/day/seasonality)
+Using a synthetic dataset of **112,568 trips** across **5 regions**, the goal is to:
 
-What customer segments generate the most value
+- Understand daily, weekly, and hourly demand seasonality  
+- Identify high-value customer segments  
+- Analyze revenue concentration  
+- Apply SQL queries for data exploration  
+- Provide insights to improve operations, scheduling, and customer retention  
 
-How to improve scheduling, marketing, and retention strategies
+The analysis mimics real workflows used by data teams in ride-hailing, mobility, and transportation analytics.
 
-🎯 Project Objectives
-Demand Analysis
+---
 
-Daily, hourly, and weekday volume patterns
+## 🎯 Project Objectives
 
-Seasonality insights
+### **Demand Forecasting & Seasonality**
+- Trips by hour of day  
+- Trips by day of week  
+- Daily trip volume trend  
+- Identification of peak hours and low-demand periods  
 
-Operational recommendations for driver allocation
+### **Customer Lifetime Value (CLV)**
+- Customer revenue and frequency aggregation  
+- Recency & tenure metrics  
+- CLV segmentation (Low / Medium / High)  
+- Revenue share per segment  
 
-Customer Value Analysis
+### **SQL Analytics**
+- Trips by region & weekday  
+- Average revenue by CLV segment  
+- High-value customer concentration  
 
-Aggregate revenue per customer
+---
 
-Recency, frequency, and monetary metrics
+## 📊 Dataset Description
 
-CLV segmentation (low / medium / high)
+### **Trips dataset (`mobility_trips_dataset.csv`)**
+Includes 112,568 synthetic ride records:
 
-Revenue concentration analysis
+- `trip_id`  
+- `customer_id`  
+- `trip_datetime`  
+- `region`  
+- `ride_type` (standard / premium / pool)  
+- `distance_km`  
+- `duration_min`  
+- `price`  
+- `rating`  
 
-SQL Portfolio Analytics
+### **Customer aggregates (`mobility_customers_agg.csv`)**
+Includes 30,000 unique customers:
 
-Trips by region & weekday
+- `customer_id`  
+- `trips`  
+- `total_revenue`  
+- `avg_price`  
+- `first_trip`  
+- `last_trip`  
+- `recency_days`  
+- `tenure_days`  
+- `trips_per_month`  
+- `clv_segment`  
 
-Revenue per CLV segment
+---
 
-High-value customer distribution
+# 📈 Demand Seasonality Analysis
 
-📊 Demand Seasonality
-Daily Trips Over Time
+### **Daily Trips Over Time**
+![Daily Trips](images/daily_trips.png)
 
-Trips by Hour of the Day
+### **Trips by Hour of Day**
+![Trips by Hour](images/trips_by_hour.png)
 
-Trips by Day of the Week
+### **Trips by Day of Week**
+![Trips by Day of Week](images/trips_by_dow.png)
 
-👤 CLV Analysis
-Revenue Share by CLV Segment
+---
 
-Customer segments:
+# 🧮 Customer Lifetime Value (CLV)
 
-Segment	Description	Revenue Impact
-Low	Occasional riders	Low
-Medium	Regular riders	Moderate
-High (Top 10%)	Most profitable riders	Very high
-🗄 SQL Analysis
-Trips by Region and Weekday
+### **Revenue Share by CLV Segment**
+![CLV Segments](images/clv_segments.png)
+
+**Key Observations:**
+- High-value customers represent a small share of the userbase but generate a large share of revenue.  
+- Medium CLV users present strong potential for targeted upselling.  
+- Low-value customers dominate volume but contribute minimally to revenue.
+
+---
+
+# 🗄 SQL Analysis (SQLite)
+
+### **Trips by Region & Weekday**
+
 SELECT 
-    region,
-    dow,
+    t.region,
+    t.dow,
     COUNT(*) AS trips
-FROM trips
-GROUP BY region, dow
-ORDER BY region, trips DESC;
+FROM (
+    SELECT 
+        region,
+        CASE strftime('%w', trip_datetime)
+            WHEN '0' THEN 'Sunday'
+            WHEN '1' THEN 'Monday'
+            WHEN '2' THEN 'Tuesday'
+            WHEN '3' THEN 'Wednesday'
+            WHEN '4' THEN 'Thursday'
+            WHEN '5' THEN 'Friday'
+            WHEN '6' THEN 'Saturday'
+        END AS dow
+    FROM trips
+) t
+GROUP BY t.region, t.dow
+ORDER BY t.region, trips DESC;
 
-Revenue by CLV Segment
+Average Revenue by CLV Segment
 SELECT 
     clv_segment,
     COUNT(*) AS customers,
-    SUM(total_revenue) AS total_revenue,
-    AVG(total_revenue) AS avg_revenue
+    ROUND(AVG(total_revenue), 2) AS avg_revenue,
+    SUM(total_revenue) AS total_revenue
 FROM customers
 GROUP BY clv_segment
 ORDER BY total_revenue DESC;
 
-High-Value Customer Distribution
+High-Value Customers by Region
 SELECT 
     t.region,
     COUNT(DISTINCT c.customer_id) AS high_value_customers,
@@ -93,26 +149,33 @@ GROUP BY t.region
 ORDER BY total_revenue DESC;
 
 🚀 Key Insights
+🔹 Demand
 
-Clear morning and evening demand peaks
+Clear morning and evening peaks, ideal for driver scheduling optimization
 
-Weekdays significantly outperform weekends in ride volume
+Weekends show different demand profiles vs weekdays
 
-A small group of high-CLV customers generates most revenue
+Daily volume trends suitable for forecasting
 
-Some regions have higher concentration of premium riders
+🔹 Customer Value
 
-Strong opportunities for targeted retention and pricing strategies
+Revenue is heavily concentrated in high-value users
+
+Medium CLV customers drive strong frequency → ideal upsell target
+
+Region differences suggest tailored marketing
 
 💡 Recommendations
 
-Align driver supply with peak hours to reduce wait times
+Optimize driver supply according to hourly demand peaks
 
-Build loyalty programs for high & medium CLV customers
+Create loyalty programs targeting medium & high CLV users
 
-Tailor promotions by region and customer value
+Use CLV for marketing acquisition (lookalike audiences)
 
-Expand future analysis with churn prediction & service quality metrics
+Introduce premium features in high-value regions
+
+Build a forecasting model (ARIMA/Prophet) to extend this analysis
 
 📁 Repository Structure
 demand_seasonality_e_customer_lifetime_value/
@@ -120,15 +183,16 @@ demand_seasonality_e_customer_lifetime_value/
 │   ├── mobility_trips_dataset.csv
 │   └── mobility_customers_agg.csv
 ├── images/
-│   ├── daily_trip.png
-│   ├── trip_by_hour.png
+│   ├── daily_trips.png
+│   ├── trips_by_hour.png
 │   ├── trips_by_dow.png
 │   └── clv_segments.png
-└── mobility_demand_clv_analysis.ipynb
+├── mobility_demand_clv_analysis.ipynb
+└── README.md
 
 📬 Contact
 
-Luis Chaumer – Data Analyst
+Luis Chaumer
+Data Analyst
 📩 Email: luischaumer@gmail.com
-
 🔗 LinkedIn: https://www.linkedin.com/in/luis-chaumer123
