@@ -2,6 +2,7 @@
 
 **Author:** Luis Chaumer  
 **Role:** Data Analyst  
+**Company:** Icar Services
 **Tools:** Python, SQL (SQLite), Pandas, NumPy, Matplotlib, Jupyter Notebook  
 **Dataset:** Synthetic — 112,568 trips & 30,000 customers  
 **Period:** May 2024 – May 2025  
